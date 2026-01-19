@@ -1,29 +1,19 @@
-cmake_minimum_required(VERSION 3.0.2)
+cmake_minimum_required(VERSION 3.8)
 project(reference_costmap_generator)
 
 # parameters
 option(USE_OPENMP "USE_OPENMP" ON) # ON / OFF
 
-## Find catkin macros and libraries
-## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
-## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS
-  grid_map_core
-  grid_map_filters
-  grid_map_loader
-  grid_map_msgs
-  grid_map_ros
-  grid_map_rviz_plugin
-  grid_map_visualization
-  nav_msgs
-  roscpp
-  tf2
-  tf2_geometry_msgs
-  tf2_ros
-)
-
-# use eigen3 (matrix computation library)
-find_package(Eigen3 REQUIRED)
+find_package(ament_cmake REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(grid_map_core REQUIRED)
+find_package(grid_map_msgs REQUIRED)
+find_package(grid_map_ros REQUIRED)
+find_package(nav_msgs REQUIRED)
+find_package(visualization_msgs REQUIRED)
+find_package(tf2 REQUIRED)
+find_package(tf2_geometry_msgs REQUIRED)
+find_package(tf2_ros REQUIRED)
 
 # load openmp
 if(USE_OPENMP)
@@ -38,23 +28,23 @@ if(USE_OPENMP)
   endif()
 endif()
 
-catkin_package(
-)
-
-###########
-## Build ##
-###########
-
-## Specify additional locations of header files
-## Your package locations should be listed before other locations
 include_directories(
   include
-  ${catkin_INCLUDE_DIRS}
-  ${EIGEN3_INCLUDE_DIR}
 )
 
-## Declare a C++ library
 add_library(reference_costmap_generator SHARED src/reference_costmap_generator.cpp)
+
+ament_target_dependencies(reference_costmap_generator
+  rclcpp
+  grid_map_core
+  grid_map_msgs
+  grid_map_ros
+  nav_msgs
+  visualization_msgs
+  tf2
+  tf2_geometry_msgs
+  tf2_ros
+)
 
 ## link openmp
 if(USE_OPENMP)
@@ -65,29 +55,33 @@ if(USE_OPENMP)
   endif()
 endif()
 
-## Declare a C++ executable
-## With catkin_make all packages are built within a single CMake context
-## The recommended prefix ensures that target names across packages don't collide
 add_executable(${PROJECT_NAME}_node src/reference_costmap_generator_node.cpp)
 
-## Add cmake target dependencies of the executable
-## same as for the library above
-add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-
-## Specify libraries to link a library or executable target against
 target_link_libraries(${PROJECT_NAME}_node
   reference_costmap_generator
-  ${catkin_LIBRARIES}
 )
 
-#############
-## Install ##
-#############
+ament_target_dependencies(${PROJECT_NAME}_node
+  rclcpp
+  grid_map_core
+  grid_map_msgs
+  grid_map_ros
+  nav_msgs
+  visualization_msgs
+  tf2
+  tf2_geometry_msgs
+  tf2_ros
+)
 
-## Mark other files for installation (e.g. launch and bag files, etc.)
+install(TARGETS reference_costmap_generator ${PROJECT_NAME}_node
+  DESTINATION lib/${PROJECT_NAME}
+)
+
 install(
   DIRECTORY
     launch
     config
-  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+  DESTINATION share/${PROJECT_NAME}
 )
+
+ament_package()

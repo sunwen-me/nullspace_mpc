@@ -3,7 +3,7 @@
 SHELL:=/bin/bash
 PROJ_NAME=nullspace_mpc
 VERSION=0.1.1
-USER_NAME=noetic
+USER_NAME=humble
 
 # Docker image and container naming
 DOCKER_IMAGE_BASE = $(PROJ_NAME):$(VERSION)
@@ -20,8 +20,8 @@ XAUTH = /tmp/.docker.xauth
 # Build CPU image
 setup_docker_cpu:
 	docker build \
-		--build-arg BASE_IMAGE=ubuntu:20.04 \
-		--build-arg ROS_PACKAGE=ros-noetic-desktop \
+		--build-arg BASE_IMAGE=ubuntu:22.04 \
+		--build-arg ROS_PACKAGE=ros-humble-desktop \
 		-t $(DOCKER_IMAGE_BASE)-cpu \
 		-f docker/Dockerfile_cpu .
 
@@ -113,19 +113,16 @@ exec_docker_gpu:
 # build ros packages
 build:
 	@set -e; \
-	source /opt/ros/noetic/setup.bash; \
+	source /opt/ros/humble/setup.bash; \
 	export CC=clang-11 CXX=clang++-11; \
-	ARCH=$$(dpkg-architecture -qDEB_HOST_MULTIARCH 2>/dev/null || echo x86_64-linux-gnu); \
-	catkin build --cmake-args \
+	colcon build --symlink-install --cmake-args \
 	  -DCMAKE_BUILD_TYPE=Release \
-	  -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
-	  -DCMAKE_SYSTEM_LIBRARY_PATH="/usr/lib/$$ARCH;/lib/$$ARCH;/usr/lib;/lib" \
 	  -DCMAKE_CXX_FLAGS="-O2" \
 	  -DENABLE_OSQP=ON
 
 # clean build caches
 clean:
-	rm -r build devel logs .catkin_tools
+	rm -rf build install log
 
 # install packages which are not supported by rosdep
 install_deps:
@@ -145,49 +142,49 @@ killall:
 
 # record rosbag (all topics)
 record:
-	cd ${WORKSPACE}/rosbag; rosbag record -a
+	cd ${WORKSPACE}/rosbag; ros2 bag record -a
 
 # play and check rosbag
 ## [shell 1] make view_rosbag
-## [shell 2] rosbag play rosbag/xxx.bag
+## [shell 2] ros2 bag play rosbag/xxx.bag
 view_rosbag:
-	source /opt/ros/noetic/setup.bash && source ./devel/setup.bash &&\
-	roslaunch launch/rosbag_play.launch workspace:=${WORKSPACE}
+	source /opt/ros/humble/setup.bash && source ./install/setup.bash &&\
+	ros2 launch launch/rosbag_play.launch.py workspace:=${WORKSPACE}
 
 # gazebo_world.launch
 gazebo_world:
-	source /opt/ros/noetic/setup.bash && source ./devel/setup.bash &&\
-	roslaunch launch/gazebo_world.launch
+	source /opt/ros/humble/setup.bash && source ./install/setup.bash &&\
+	ros2 launch launch/gazebo_world.launch.py
 
 # gmapping.launch
 gmapping:
-	source /opt/ros/noetic/setup.bash && source ./devel/setup.bash &&\
-	roslaunch launch/gmapping.launch workspace:=${WORKSPACE}
+	source /opt/ros/humble/setup.bash && source ./install/setup.bash &&\
+	ros2 launch launch/gmapping.launch.py workspace:=${WORKSPACE}
 
 # navigation.launch
 navigation:
-	source /opt/ros/noetic/setup.bash && source ./devel/setup.bash &&\
-	roslaunch launch/navigation.launch workspace:=${WORKSPACE}
+	source /opt/ros/humble/setup.bash && source ./install/setup.bash &&\
+	ros2 launch launch/navigation.launch.py workspace:=${WORKSPACE}
 
 # navigation with nullspace_mpc
 navigation_nullspace_mpc:
-	source /opt/ros/noetic/setup.bash && source ./devel/setup.bash &&\
-	roslaunch launch/navigation.launch workspace:=${WORKSPACE} local_planner:=nullspace_mpc
+	source /opt/ros/humble/setup.bash && source ./install/setup.bash &&\
+	ros2 launch launch/navigation.launch.py workspace:=${WORKSPACE} local_planner:=nullspace_mpc
 
 # navigation with nullspace_mpc (lite)
 navigation_nullspace_mpc_lite:
-	source /opt/ros/noetic/setup.bash && source ./devel/setup.bash &&\
+	source /opt/ros/humble/setup.bash && source ./install/setup.bash &&\
 	export OMT_WAIT_POLICY=PASSIVE &&\
-	roslaunch launch/navigation.launch workspace:=${WORKSPACE} controller_mode:=lite  show_gazebo_gui:=false gazebo_headless:=true
+	ros2 launch launch/navigation.launch.py workspace:=${WORKSPACE} controller_mode:=lite  show_gazebo_gui:=false gazebo_headless:=true
 
 # navigation with mppi
 navigation_mppi:
-	source /opt/ros/noetic/setup.bash && source ./devel/setup.bash &&\
-	roslaunch launch/navigation.launch workspace:=${WORKSPACE} local_planner:=mppi_h
+	source /opt/ros/humble/setup.bash && source ./install/setup.bash &&\
+	ros2 launch launch/navigation.launch.py workspace:=${WORKSPACE} local_planner:=mppi_h
 
 # evaluation demo with nullspace_mpc
 eval_demo_nullspace_mpc:
-	source $(WORKSPACE)/devel/setup.bash &&\
+	source $(WORKSPACE)/install/setup.bash &&\
 	mkdir -p result &&\
 	python3 $(WORKSPACE)/src/evaluation/mpc_nav_evaluator/scripts/run_evaluation.py \
 	--agenda_yaml_path $(WORKSPACE)/data/eval_demo/agenda.yaml \
@@ -195,34 +192,34 @@ eval_demo_nullspace_mpc:
 
 # evaluation demo with mppi
 eval_demo_mppi:
-	source $(WORKSPACE)/devel/setup.bash &&\
+	source $(WORKSPACE)/install/setup.bash &&\
 	mkdir -p result &&\
 	python3 $(WORKSPACE)/src/evaluation/mpc_nav_evaluator/scripts/run_evaluation.py \
 	--agenda_yaml_path $(WORKSPACE)/data/eval_demo/agenda.yaml \
 	--controller mppi_h
 
 # eval_demo_mppi_3d_a:
-# 	source $(WORKSPACE)/devel/setup.bash &&\
+# 	source $(WORKSPACE)/install/setup.bash &&\
 # 	mkdir -p result &&\
 # 	python3 $(WORKSPACE)/src/evaluation/mpc_nav_evaluator/scripts/run_evaluation.py \
 # 	--agenda_yaml_path $(WORKSPACE)/data/eval_demo/agenda.yaml \
 # 	--controller mppi_3d_a
 
 # eval_demo_mppi_3d_b:
-# 	source $(WORKSPACE)/devel/setup.bash &&\
+# 	source $(WORKSPACE)/install/setup.bash &&\
 # 	mkdir -p result &&\
 # 	python3 $(WORKSPACE)/src/evaluation/mpc_nav_evaluator/scripts/run_evaluation.py \
 # 	--agenda_yaml_path $(WORKSPACE)/data/eval_demo/agenda.yaml \
 # 	--controller mppi_3d_b
 
 eval_ten_small:
-	source $(WORKSPACE)/devel/setup.bash &&\
+	source $(WORKSPACE)/install/setup.bash &&\
 	mkdir -p result &&\
 	python3 $(WORKSPACE)/src/evaluation/mpc_nav_evaluator/scripts/run_evaluation.py \
 	--agenda_yaml_path $(WORKSPACE)/data/eval_ten/small/agenda_small.yaml \
 
 eval_ten_large:
-	source $(WORKSPACE)/devel/setup.bash &&\
+	source $(WORKSPACE)/install/setup.bash &&\
 	mkdir -p result &&\
 	python3 $(WORKSPACE)/src/evaluation/mpc_nav_evaluator/scripts/run_evaluation.py \
 	--agenda_yaml_path $(WORKSPACE)/data/eval_ten/large/agenda_large.yaml \

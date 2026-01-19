@@ -1,9 +1,12 @@
+#include <rclcpp/rclcpp.hpp>
+
 #include "map_visualizer/map_visualizer.hpp"
 
 int main(int argc, char **argv)
 {
-    ros::init(argc, argv, "map_visualizer");
-    visualization::MapVisualizer map_visualizer;
-    ros::spin();
+    rclcpp::init(argc, argv);
+    auto map_visualizer = std::make_shared<visualization::MapVisualizer>();
+    rclcpp::spin(map_visualizer);
+    rclcpp::shutdown();
     return 0;
 };

@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<package format="2">
+<package format="3">
   <name>map_visualizer</name>
   <version>0.0.0</version>
   <description>The map_visualizer package</description>
@@ -11,24 +11,11 @@
   <license>MIT</license>
 
   <!-- dependencies -->
-  <buildtool_depend>catkin</buildtool_depend>
-  <build_depend>nav_msgs</build_depend>
-  <build_depend>visualization_msgs</build_depend>
-  <build_depend>roscpp</build_depend>
-  <build_depend>tf2</build_depend>
-  <build_depend>tf2_geometry_msgs</build_depend>
-  <build_depend>tf2_ros</build_depend>
-  <build_export_depend>nav_msgs</build_export_depend>
-  <build_export_depend>visualization_msgs</build_export_depend>
-  <build_export_depend>roscpp</build_export_depend>
-  <build_export_depend>tf2</build_export_depend>
-  <build_export_depend>tf2_geometry_msgs</build_export_depend>
-  <build_export_depend>tf2_ros</build_export_depend>
-  <exec_depend>nav_msgs</exec_depend>
-  <exec_depend>visualization_msgs</exec_depend>
-  <exec_depend>roscpp</exec_depend>
-  <exec_depend>tf2</exec_depend>
-  <exec_depend>tf2_geometry_msgs</exec_depend>
-  <exec_depend>tf2_ros</exec_depend>
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <depend>rclcpp</depend>
+  <depend>visualization_msgs</depend>
+  <depend>tf2</depend>
+  <depend>tf2_geometry_msgs</depend>
+  <depend>tf2_ros</depend>
 
 </package>

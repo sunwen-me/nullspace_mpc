@@ -5,7 +5,7 @@ It demonstrates agile and smooth navigation through a narrow environment with a 
 
 <div align="center">
 
-[![ROS Distro: Noetic](https://img.shields.io/badge/ROS-Noetic-red.svg)](https://wiki.ros.org/noetic)
+[![ROS Distro: Humble](https://img.shields.io/badge/ROS-Humble-blue.svg)](https://docs.ros.org/en/humble/)
 [![Docker](https://img.shields.io/badge/-Docker-EEE.svg?logo=docker&style=flat)](https://www.docker.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
@@ -24,8 +24,8 @@ Note: This is the recommended setup for optimal performance.
 <summary>Click here to expand</summary>
 
 1. Prerequisites
-    - [Ubuntu 20.04](https://releases.ubuntu.com/focal/)
-    - [ROS Noetic](https://wiki.ros.org/noetic)
+    - [Ubuntu 22.04](https://releases.ubuntu.com/jammy/)
+    - [ROS 2 Humble](https://docs.ros.org/en/humble/)
 
 2. Clone the repository.
     ```bash
@@ -43,14 +43,14 @@ Note: This is the recommended setup for optimal performance.
     ```bash
     cd <path-to-your-workspace>/nullspace_mpc
     sudo rosdep init # Skip if already initialized
-    rosdep update --rosdistro noetic
-    rosdep install -y --from-paths src --ignore-src --rosdistro noetic
+    rosdep update --rosdistro humble
+    rosdep install -y --from-paths src --ignore-src --rosdistro humble
     ```
 
 5. Build the project.
     ```bash
     cd <path-to-your-workspace>/nullspace_mpc
-    make build
+    colcon build --symlink-install
     ```
 
 </details>  
@@ -73,7 +73,7 @@ Note: This is the recommended setup for optimal performance.
     - [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html)
         - This is required to allow Docker containers to access the host's GPU.
     - NVIDIA GPU & Driver
-        - An NVIDIA GPU and a compatible driver for the base image (nvidia/cuda:12.4.1-devel-ubuntu20.04) are required.
+        - An NVIDIA GPU and a compatible driver for the base image (nvidia/cuda:12.4.1-devel-ubuntu22.04) are required.
 
 2. Clone the repository.
     ```bash
@@ -96,7 +96,7 @@ Note: This is the recommended setup for optimal performance.
 5. [Inside the docker container] Build the project.
     ```bash
     cd ~/nullspace_mpc
-    make build
+    colcon build --symlink-install
     ```
 
 </details>
@@ -146,6 +146,9 @@ Warning: This setup runs entirely on the CPU. Performance is significantly lower
 ## Usage
 
 This package supports two operation modes:
+
+> [!NOTE]
+> ROS 2 launch files have to be converted to `*.launch.py` before running the commands below. After building with colcon, remember to source `install/setup.bash`.
 
 1. **Manual Goal Mode** — you set a 2D Nav Goal in RViz and the robot navigates to it.  
 2. **Demo (Multi-Goal) Mode** — the robot automatically visits a sequence of goals defined in an agenda file.
