@@ -1,43 +1,28 @@
-cmake_minimum_required(VERSION 3.0.2)
+cmake_minimum_required(VERSION 3.8)
 project(world_handler)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS
-  roscpp
-  std_msgs
-  tf2
-  tf2_geometry_msgs
-  tf2_ros
-)
-
-catkin_package(
-)
-
-###########
-## Build ##
-###########
+find_package(ament_cmake REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(tf2 REQUIRED)
+find_package(tf2_geometry_msgs REQUIRED)
+find_package(tf2_ros REQUIRED)
 
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
-include_directories(
-  include
-  ${catkin_INCLUDE_DIRS}
-)
+include_directories(include)
 
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
 add_executable(${PROJECT_NAME}_node src/world_handler_node.cpp src/world_handler.cpp)
-
-## Add cmake target dependencies of the executable
-## same as for the library above
-add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-
-## Specify libraries to link a library or executable target against
-target_link_libraries(${PROJECT_NAME}_node
-  ${catkin_LIBRARIES}
+ament_target_dependencies(${PROJECT_NAME}_node
+  rclcpp
+  tf2
+  tf2_geometry_msgs
+  tf2_ros
 )
 
 #############
@@ -45,9 +30,14 @@ target_link_libraries(${PROJECT_NAME}_node
 #############
 
 ## Mark other files for installation (e.g. launch and bag files, etc.)
-install(
-  DIRECTORY
-    launch
-    config
-  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+install(TARGETS ${PROJECT_NAME}_node
+  DESTINATION lib/${PROJECT_NAME}
 )
+
+install(DIRECTORY
+  launch
+  config
+  DESTINATION share/${PROJECT_NAME}
+)
+
+ament_package()

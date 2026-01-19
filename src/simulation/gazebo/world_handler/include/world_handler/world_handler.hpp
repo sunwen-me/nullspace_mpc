@@ -1,20 +1,19 @@
 #pragma once
 
-#include <ros/ros.h>
 #include <signal.h>
+
+#include <rclcpp/rclcpp.hpp>
 
 namespace gazebo
 {
-    class WorldHandler
+    class WorldHandler : public rclcpp::Node
     {
         public:
             WorldHandler();
             ~WorldHandler();
         private:
-            ros::NodeHandle nh_;
-            ros::NodeHandle private_nh_;
-            ros::Timer timer_;
+            rclcpp::TimerBase::SharedPtr timer_;
             static void sigintHandler(int sig);
-            void timerCallback(const ros::TimerEvent& event);
+            void timerCallback();
     };
 }

@@ -22,6 +22,11 @@ mark_as_advanced(FORCE FORCE_ALL_SOLVER_TEST)
 option(SKIP_PRIVATE_SOLVER_TEST "Skip private solver test" OFF)
 mark_as_advanced(FORCE SKIP_PRIVATE_SOLVER_TEST)
 
+if(DEFINED AMENT_CURRENT_PREFIX)
+  find_package(ament_cmake REQUIRED)
+  find_package(rclcpp REQUIRED)
+endif()
+
 if(DEFINED CATKIN_DEVEL_PREFIX)
   find_package(catkin REQUIRED COMPONENTS
     roscpp
@@ -168,4 +173,8 @@ endif()
 OPTION(INSTALL_DOCUMENTATION "Generate and install the documentation" OFF)
 if(INSTALL_DOCUMENTATION)
   add_subdirectory(doc)
+endif()
+
+if(DEFINED AMENT_CURRENT_PREFIX)
+  ament_package()
 endif()
