@@ -1,14 +1,18 @@
 #include "world_handler/world_handler.hpp"
 
+#include <chrono>
+
 namespace gazebo
 {
 
 // constructor
 WorldHandler::WorldHandler()
-    : nh_(""), private_nh_("~")
+    : rclcpp::Node("world_handler")
 {
     // register SIGINT handler
     signal(SIGINT, WorldHandler::sigintHandler);
+
+    timer_ = this->create_wall_timer(std::chrono::seconds(1), std::bind(&WorldHandler::timerCallback, this));
 }
 
 // destructor
@@ -20,16 +24,18 @@ WorldHandler::~WorldHandler()
 // add signal handler of Ctrl+C
 void WorldHandler::sigintHandler(int sig)
 {
-    ROS_WARN("Ctrl+C is pressed. kill gazebo process.");
+    (void)sig;
+    RCLCPP_WARN(rclcpp::get_logger("world_handler"), "Ctrl+C is pressed. kill gazebo process.");
     int result_kill_gazebo = system("killall -9 gzserver gzclient&");
-    ros::shutdown();
+    (void)result_kill_gazebo;
+    rclcpp::shutdown();
 }
 
 // timer callback
-void WorldHandler::timerCallback(const ros::TimerEvent& event)
+void WorldHandler::timerCallback()
 {
     // Not using this timer callback now...
-    ROS_INFO("timer callback in world_handler node.");
+    RCLCPP_INFO(this->get_logger(), "timer callback in world_handler node.");
 }
 
 } // namespace gazebo

@@ -1,23 +1,24 @@
 #include "map_visualizer/map_visualizer.hpp"
 
+#include <chrono>
+
 namespace visualization
 {
     MapVisualizer::MapVisualizer()
-        : nh_(""), private_nh_("~")
+        : rclcpp::Node("map_visualizer")
     {
         // load parameters
-        std::string map_name;
-        private_nh_.param<std::string>("map_name", map_name, "");
+        std::string map_name = this->declare_parameter<std::string>("map_name", "");
 
         //// publishing topic names
-        std::string rviz_3dmap_topic;
-        private_nh_.param<std::string>("rviz_3dmap_topic", rviz_3dmap_topic, "/rviz_3dmap");
+        std::string rviz_3dmap_topic = this->declare_parameter<std::string>("rviz_3dmap_topic", "/rviz_3dmap");
 
         // initialize publishers
-        pub_rviz_3dmap_ = nh_.advertise<visualization_msgs::MarkerArray>(rviz_3dmap_topic, 10);
+        pub_rviz_3dmap_ =
+            this->create_publisher<visualization_msgs::msg::MarkerArray>(rviz_3dmap_topic, rclcpp::QoS(10));
 
         // wait for a few seconds
-        ros::Duration(5.0).sleep();
+        rclcpp::sleep_for(std::chrono::duration<double>(5.0));
 
         // publish the 3D map only once
         if (map_name == "maze")
@@ -30,7 +31,7 @@ namespace visualization
         }
         else
         {
-            ROS_ERROR("[MapVisualizer] Unknown map name: %s", map_name.c_str());
+            RCLCPP_ERROR(this->get_logger(), "[MapVisualizer] Unknown map name: %s", map_name.c_str());
         }
     }
 
@@ -41,8 +42,8 @@ namespace visualization
 
     void MapVisualizer::publishRviz3DMapOfMaze()
     {
-        visualization_msgs::MarkerArray marker_array;
-        ros::Time now = ros::Time::now();
+        visualization_msgs::msg::MarkerArray marker_array;
+        rclcpp::Time now = this->now();
     
         // === Configuration constants ===
         const double WALL_HEIGHT_OFFSET_Z = -0.5;
@@ -80,13 +81,13 @@ namespace visualization
     
         for (const WallInfo& wall : walls)
         {
-            visualization_msgs::Marker marker;
+            visualization_msgs::msg::Marker marker;
             marker.header.frame_id = "map";
             marker.header.stamp = now;
             marker.ns = "maze_walls";
             marker.id = marker_id++;
-            marker.type = visualization_msgs::Marker::CUBE;
-            marker.action = visualization_msgs::Marker::ADD;
+            marker.type = visualization_msgs::msg::Marker::CUBE;
+            marker.action = visualization_msgs::msg::Marker::ADD;
     
             marker.pose.position.x = wall.x;
             marker.pose.position.y = wall.y;
@@ -109,13 +110,13 @@ namespace visualization
         }
     
         // === Floor ===
-        visualization_msgs::Marker floor;
+        visualization_msgs::msg::Marker floor;
         floor.header.frame_id = "map";
         floor.header.stamp = now;
         floor.ns = "maze_floor";
         floor.id = marker_id++;
-        floor.type = visualization_msgs::Marker::CUBE;
-        floor.action = visualization_msgs::Marker::ADD;
+        floor.type = visualization_msgs::msg::Marker::CUBE;
+        floor.action = visualization_msgs::msg::Marker::ADD;
     
         floor.pose.position.x = 0.0;
         floor.pose.position.y = 0.0;
@@ -133,13 +134,13 @@ namespace visualization
     
         marker_array.markers.push_back(floor);
     
-        pub_rviz_3dmap_.publish(marker_array);
+        pub_rviz_3dmap_->publish(marker_array);
     }
     
     void MapVisualizer::publishRviz3DMapOfCylinderGarden()
     {
-        visualization_msgs::MarkerArray marker_array;
-        ros::Time now = ros::Time::now();
+        visualization_msgs::msg::MarkerArray marker_array;
+        rclcpp::Time now = this->now();
     
         // === Configuration constants ===
         const double WALL_HEIGHT_OFFSET_Z     = -0.5;
@@ -169,13 +170,13 @@ namespace visualization
         {
             for (int c = 0; c < COLS; ++c)
             {
-                visualization_msgs::Marker cyl;
+                visualization_msgs::msg::Marker cyl;
                 cyl.header.frame_id = "map";
                 cyl.header.stamp = now;
                 cyl.ns = "cylinder_garden";
                 cyl.id = marker_id++;
-                cyl.type = visualization_msgs::Marker::CYLINDER;
-                cyl.action = visualization_msgs::Marker::ADD;
+                cyl.type = visualization_msgs::msg::Marker::CYLINDER;
+                cyl.action = visualization_msgs::msg::Marker::ADD;
     
                 cyl.pose.position.x = ORIGIN_X + c * STEP_X;
                 cyl.pose.position.y = ORIGIN_Y + r * STEP_Y;
@@ -206,13 +207,13 @@ namespace visualization
     
         for (const WallInfo& wall : walls)
         {
-            visualization_msgs::Marker marker;
+            visualization_msgs::msg::Marker marker;
             marker.header.frame_id = "map";
             marker.header.stamp = now;
             marker.ns = "cylinder_walls";
             marker.id = marker_id++;
-            marker.type = visualization_msgs::Marker::CUBE;
-            marker.action = visualization_msgs::Marker::ADD;
+            marker.type = visualization_msgs::msg::Marker::CUBE;
+            marker.action = visualization_msgs::msg::Marker::ADD;
     
             marker.pose.position.x = wall.x;
             marker.pose.position.y = wall.y;
@@ -235,13 +236,13 @@ namespace visualization
         }
     
         // === Floor ===
-        visualization_msgs::Marker floor;
+        visualization_msgs::msg::Marker floor;
         floor.header.frame_id = "map";
         floor.header.stamp = now;
         floor.ns = "cylinder_floor";
         floor.id = marker_id++;
-        floor.type = visualization_msgs::Marker::CUBE;
-        floor.action = visualization_msgs::Marker::ADD;
+        floor.type = visualization_msgs::msg::Marker::CUBE;
+        floor.action = visualization_msgs::msg::Marker::ADD;
     
         floor.pose.position.x = 0.0;
         floor.pose.position.y = 0.0;
@@ -259,7 +260,7 @@ namespace visualization
     
         marker_array.markers.push_back(floor);
     
-        pub_rviz_3dmap_.publish(marker_array);
+        pub_rviz_3dmap_->publish(marker_array);
     }
 
 } // namespace visualization

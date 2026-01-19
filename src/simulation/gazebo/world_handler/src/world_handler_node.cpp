@@ -1,9 +1,12 @@
+#include <rclcpp/rclcpp.hpp>
+
 #include "world_handler/world_handler.hpp"
 
 int main(int argc, char **argv)
 {
-    ros::init(argc, argv, "world_handler");
-    gazebo::WorldHandler world_handler;
-    ros::spin();
+    rclcpp::init(argc, argv);
+    auto world_handler = std::make_shared<gazebo::WorldHandler>();
+    rclcpp::spin(world_handler);
+    rclcpp::shutdown();
     return 0;
 };

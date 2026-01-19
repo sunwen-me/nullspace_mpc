@@ -1,31 +1,24 @@
-cmake_minimum_required(VERSION 3.0.2)
+cmake_minimum_required(VERSION 3.8)
 project(nullspace_mpc)
 
 # parameters
 option(USE_OPENMP "USE_OPENMP" ON) # ON / OFF
 
-## Find catkin macros and libraries
-## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
-## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS
-  geometry_msgs
-  visualization_msgs
-  jsk_rviz_plugins
-  nav_msgs
-  roscpp
-  tf2
-  tf2_geometry_msgs
-  tf2_ros
-  grid_map_core
-  grid_map_ros
-  grid_map_filters
-  grid_map_loader
-  grid_map_msgs
-  grid_map_rviz_plugin
-  grid_map_visualization
-  qp_solver_collection
-  mpc_eval_msgs
-)
+find_package(ament_cmake REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(geometry_msgs REQUIRED)
+find_package(visualization_msgs REQUIRED)
+find_package(jsk_rviz_plugins REQUIRED)
+find_package(nav_msgs REQUIRED)
+find_package(tf2 REQUIRED)
+find_package(tf2_geometry_msgs REQUIRED)
+find_package(tf2_ros REQUIRED)
+find_package(grid_map_core REQUIRED)
+find_package(grid_map_ros REQUIRED)
+find_package(grid_map_msgs REQUIRED)
+find_package(grid_map_visualization REQUIRED)
+find_package(qp_solver_collection REQUIRED)
+find_package(mpc_eval_msgs REQUIRED)
 
 # use eigen3 (matrix computation library)
 find_package(Eigen3 REQUIRED)
@@ -43,23 +36,12 @@ if(USE_OPENMP)
   endif()
 endif()
 
-catkin_package(
-)
-
-###########
-## Build ##
-###########
-
-## Specify additional locations of header files
-## Your package locations should be listed before other locations
 include_directories(
   include
-  ${catkin_INCLUDE_DIRS}
   ${EIGEN3_INCLUDE_DIR}
   # ${OPENMP_INCLUDE_DIR}
 )
 
-## Declare a C++ library
 add_library(nullspace_mpc_core SHARED src/nullspace_mpc_core.cpp)
 add_library(hqp SHARED src/hqp.cpp)
 
@@ -72,30 +54,39 @@ if(USE_OPENMP)
   endif()
 endif()
 
-## Declare a C++ executable
-## With catkin_make all packages are built within a single CMake context
-## The recommended prefix ensures that target names across packages don't collide
 add_executable(${PROJECT_NAME}_node src/nullspace_mpc_node.cpp src/nullspace_mpc.cpp)
 
-## Add cmake target dependencies of the executable
-## same as for the library above
-add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-
-## Specify libraries to link a library or executable target against
 target_link_libraries(${PROJECT_NAME}_node
-  ${catkin_LIBRARIES}
   nullspace_mpc_core
   hqp
 )
 
-#############
-## Install ##
-#############
+ament_target_dependencies(${PROJECT_NAME}_node
+  rclcpp
+  geometry_msgs
+  visualization_msgs
+  jsk_rviz_plugins
+  nav_msgs
+  tf2
+  tf2_geometry_msgs
+  tf2_ros
+  grid_map_core
+  grid_map_ros
+  grid_map_msgs
+  grid_map_visualization
+  mpc_eval_msgs
+  qp_solver_collection
+)
 
-## Mark other files for installation (e.g. launch and bag files, etc.)
+install(TARGETS nullspace_mpc_core hqp ${PROJECT_NAME}_node
+  DESTINATION lib/${PROJECT_NAME}
+)
+
 install(
   DIRECTORY
     launch
     config
-  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+  DESTINATION share/${PROJECT_NAME}
 )
+
+ament_package()

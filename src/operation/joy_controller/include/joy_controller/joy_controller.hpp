@@ -1,23 +1,21 @@
 #pragma once
 
-#include <ros/ros.h>
-#include <sensor_msgs/Joy.h>
-#include <geometry_msgs/Twist.h>
+#include <rclcpp/rclcpp.hpp>
+#include <geometry_msgs/msg/twist.hpp>
+#include <sensor_msgs/msg/joy.hpp>
 
 namespace operation
 {
-    class JoyController
+    class JoyController : public rclcpp::Node
     {
         public:
             JoyController();
             ~JoyController();
-            void joyCallback(const sensor_msgs::Joy::ConstPtr& msg);
+            void joyCallback(const sensor_msgs::msg::Joy::ConstSharedPtr msg);
         private:
-            ros::NodeHandle nh_;
-            ros::NodeHandle private_nh_;
-            ros::Subscriber sub_joy_;
-            ros::Publisher pub_cmd_vel_;
-            geometry_msgs::Twist cmd_vel_;
+            rclcpp::Subscription<sensor_msgs::msg::Joy>::SharedPtr sub_joy_;
+            rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr pub_cmd_vel_;
+            geometry_msgs::msg::Twist cmd_vel_;
 
             // joy stick axes to be loaded from yaml file
             int joy_top_left_button_idx;

@@ -1,9 +1,12 @@
+#include <rclcpp/rclcpp.hpp>
+
 #include "vel_driver/vel_driver.hpp"
 
 int main(int argc, char **argv)
 {
-    ros::init(argc, argv, "vel_driver");
-    gazebo::VelDriver vel_driver;
-    ros::spin();
+    rclcpp::init(argc, argv);
+    auto vel_driver = std::make_shared<gazebo::VelDriver>();
+    rclcpp::spin(vel_driver);
+    rclcpp::shutdown();
     return 0;
 };

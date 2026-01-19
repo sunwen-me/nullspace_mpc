@@ -5,20 +5,25 @@ namespace gazebo
 
 // constructor
 GroundTruthOdomPublisher::GroundTruthOdomPublisher()
-    : nh_(""), private_nh_("~")
+    : rclcpp::Node("groundtruth_odom_publisher")
 {
     // load parameters 
 
     //// frame names
-    private_nh_.param<std::string>("base_frame", base_frame_name, "base_link");
-    private_nh_.param<std::string>("odom_frame", odom_frame_name, "odom");
+    base_frame_name = this->declare_parameter<std::string>("base_frame", "base_link");
+    odom_frame_name = this->declare_parameter<std::string>("odom_frame", "odom");
 
     //// subscribing topic names
-    std::string groundtruth_odom_topic;
-    private_nh_.param<std::string>("groundtruth_odom_topic", groundtruth_odom_topic, "/groundtruth_odom");
+    std::string groundtruth_odom_topic =
+        this->declare_parameter<std::string>("groundtruth_odom_topic", "/groundtruth_odom");
 
     // initialize subscribers
-    sub_groundtruth_odom_ = nh_.subscribe(groundtruth_odom_topic, 1, &GroundTruthOdomPublisher::groundTruthOdomCallback, this);
+    sub_groundtruth_odom_ = this->create_subscription<nav_msgs::msg::Odometry>(
+        groundtruth_odom_topic,
+        rclcpp::QoS(1),
+        std::bind(&GroundTruthOdomPublisher::groundTruthOdomCallback, this, std::placeholders::_1));
+
+    tf_broadcaster_ = std::make_unique<tf2_ros::TransformBroadcaster>(*this);
 }
 
 // destructor
@@ -28,10 +33,10 @@ GroundTruthOdomPublisher::~GroundTruthOdomPublisher()
 }
 
 // /odom topic callback
-void GroundTruthOdomPublisher::groundTruthOdomCallback(const nav_msgs::Odometry::ConstPtr& msg)
+void GroundTruthOdomPublisher::groundTruthOdomCallback(const nav_msgs::msg::Odometry::ConstSharedPtr msg)
 {
     // get current time
-    ros::Time time_now_ = ros::Time::now();
+    rclcpp::Time time_now_ = this->now();
 
     // publish tf (avoiding publishing tf with same timestamp repeatedly)
     if(prev_tf_timestamp_ != time_now_)
@@ -50,7 +55,7 @@ void GroundTruthOdomPublisher::groundTruthOdomCallback(const nav_msgs::Odometry:
         odom_tf_.transform.rotation.y = msg->pose.pose.orientation.y;
         odom_tf_.transform.rotation.z = msg->pose.pose.orientation.z;
         odom_tf_.transform.rotation.w = msg->pose.pose.orientation.w;
-        tf_broadcaster_.sendTransform(odom_tf_);
+        tf_broadcaster_->sendTransform(odom_tf_);
     }
 }
 

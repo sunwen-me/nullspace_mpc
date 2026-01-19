@@ -1,10 +1,10 @@
 # ---------- Base Image ----------
-FROM osrf/ros:noetic-desktop-full
+FROM osrf/ros:jazzy-desktop
 
 # ---------- Env & Args ----------
 ARG UID=1000
 ARG GID=1000
-ARG ROS_DISTRO=noetic
+ARG ROS_DISTRO=jazzy
 ENV USERNAME=$ROS_DISTRO
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=Asia/Tokyo
@@ -15,7 +15,7 @@ ENV ROS_WS=$HOME/nullspace_mpc
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
         python3-pip \
-        python3-catkin-tools \ 
+        python3-colcon-common-extensions \
         htop \
         bash-completion \
         tzdata \
@@ -68,12 +68,10 @@ RUN sed -i "s/#force_color_prompt=yes/force_color_prompt=yes/" $HOME/.bashrc && 
       echo ""; \
       echo "# Source ROS environment"; \
       echo "source /opt/ros/${ROS_DISTRO}/setup.bash"; \
-      echo "if [ -f ${ROS_WS}/devel/setup.bash ]; then"; \
-      echo "  source ${ROS_WS}/devel/setup.bash"; \
+      echo "if [ -f ${ROS_WS}/install/setup.bash ]; then"; \
+      echo "  source ${ROS_WS}/install/setup.bash"; \
       echo "fi"; \
       echo "export ROS_WORKSPACE=${ROS_WS}"; \
-      echo "# Ignore ROS 1 EOL warnings"; \
-      echo "export DISABLE_ROS1_EOL_WARNINGS=1"; \
     } >> $HOME/.bashrc
 
 # ---------- Entrypoint ----------
